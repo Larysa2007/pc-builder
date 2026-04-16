@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Збирач ПК</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <h1>🔥 Збирач ПК</h1>
+
+    <form method="POST" class="pc-form">
+        {% csrf_token %}
+
+        <label>Тип ПК:</label>
+        <select name="pc_type">
+            <option value="gaming" {% if selected_type == "gaming" %}selected{% endif %}>🎮 Ігровий</option>
+            <option value="office" {% if selected_type == "office" %}selected{% endif %}>💼 Офісний</option>
+            <option value="work" {% if selected_type == "work" %}selected{% endif %}>🛠 Для роботи</option>
+            <option value="stream" {% if selected_type == "stream" %}selected{% endif %}>🎥 Для стріму</option>
+        </select>
+
+        <label>Бюджет (грн):</label>
+        <input type="number" name="budget" value="{{ selected_budget }}">
+
+        <button type="submit">⚡ Зібрати ПК</button>
+    </form>
+    {% if error %}
+<div class="error-box">
+    {{ error }}
+</div>
+{% endif %}
+
+    {% if result %}
+    <div class="result-box">
+        <h2>✅ Рекомендована збірка</h2>
+        <p><span>CPU:</span> {{ result.cpu.name }} — {{ result.cpu.price }} грн</p>
+        <p><span>GPU:</span> {{ result.gpu.name }} — {{ result.gpu.price }} грн</p>
+        <p><span>RAM:</span> {{ result.ram.name }} — {{ result.ram.price }} грн</p>
+        <p><span>SSD:</span> {{ result.storage.name }} — {{ result.storage.price }} грн</p>
+        <p><span>PSU:</span> {{ result.psu.name }} — {{ result.psu.price }} грн</p>
+        <p><span>Материнка:</span> {{ result.motherboard.name }} — {{ result.motherboard.price }} грн</p>
+
+        <h3>💰 Загальна ціна: {{ result.total }} грн</h3>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

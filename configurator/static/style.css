@@ -1,0 +1,101 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color: white;
+}
+
+/* контейнер */
+.container {
+    width: 600px;
+    margin: 60px auto;
+    padding: 30px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+}
+
+/* заголовок */
+h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 25px;
+    color: #38bdf8;
+    text-shadow: 0 0 10px #38bdf8;
+}
+
+/* форма */
+.pc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* input */
+select, input {
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    background: #1e293b;
+    color: white;
+    outline: none;
+}
+
+/* кнопка */
+button {
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 15px #22c55e;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px #4ade80;
+}
+
+/* блок результату */
+.result-box {
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(56,189,248,0.3);
+}
+
+/* текст */
+.result-box p {
+    margin: 10px 0;
+    font-size: 17px;
+}
+
+.result-box span {
+    color: #38bdf8;
+    font-weight: bold;
+}
+
+/* ціна */
+.result-box h3 {
+    text-align: center;
+    margin-top: 20px;
+    color: #facc15;
+    text-shadow: 0 0 10px #facc15;
+}
+.error-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(255,0,0,0.3);
+}
