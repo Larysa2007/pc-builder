@@ -2,48 +2,202 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Збирач ПК</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Configurator Pro — Експертна Система</title>
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-green: #00ff88;
+            --neon-purple: #9d50bb;
+            --dark-bg: #0b0e14;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at 50% 50%, #1a1f2c 0%, #0b0e14 100%);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 850px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group { text-align: left; }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        button {
+            grid-column: span 2;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+
+        .error-msg {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .part-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+
+        .part-card b { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-bottom: 5px; }
+
+        .total-banner {
+            margin-top: 25px;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            font-weight: bold;
+            padding: 15px;
+            border: 1px solid var(--neon-purple);
+            border-radius: 10px;
+        }
+
+        .explanation-box {
+            margin-top: 25px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px dashed var(--neon-green);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .tag { color: var(--neon-blue); font-weight: bold; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🔥 Збирач ПК</h1>
+    <h1>🚀 PC Configurator Pro</h1>
 
-    <form method="POST" class="pc-form">
-        {% csrf_token %}
-
-        <label>Тип ПК:</label>
-        <select name="pc_type">
-            <option value="gaming" {% if selected_type == "gaming" %}selected{% endif %}>🎮 Ігровий</option>
-            <option value="office" {% if selected_type == "office" %}selected{% endif %}>💼 Офісний</option>
-            <option value="work" {% if selected_type == "work" %}selected{% endif %}>🛠 Для роботи</option>
-            <option value="stream" {% if selected_type == "stream" %}selected{% endif %}>🎥 Для стріму</option>
-        </select>
-
-        <label>Бюджет (грн):</label>
-        <input type="number" name="budget" value="{{ selected_budget }}">
-
-        <button type="submit">⚡ Зібрати ПК</button>
-    </form>
     {% if error %}
-<div class="error-box">
-    {{ error }}
-</div>
-{% endif %}
+        <div class="error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="input-group">
+            <label>Тип комп'ютера:</label>
+            <select name="pc_type">
+                <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий</option>
+                <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісний</option>
+                <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Для роботи / Рендеру</option>
+                <option value="stream" {% if selected_type == 'stream' %}selected{% endif %}>🎥 Для Стрімінгу</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Бюджет (грн):</label>
+            <input type="number" name="budget" value="{{ selected_budget }}" placeholder="Мін. 5000" required>
+        </div>
+
+        <button type="submit">Сформувати конфігурацію</button>
+    </form>
 
     {% if result %}
-    <div class="result-box">
-        <h2>✅ Рекомендована збірка</h2>
-        <p><span>CPU:</span> {{ result.cpu.name }} — {{ result.cpu.price }} грн</p>
-        <p><span>GPU:</span> {{ result.gpu.name }} — {{ result.gpu.price }} грн</p>
-        <p><span>RAM:</span> {{ result.ram.name }} — {{ result.ram.price }} грн</p>
-        <p><span>SSD:</span> {{ result.storage.name }} — {{ result.storage.price }} грн</p>
-        <p><span>PSU:</span> {{ result.psu.name }} — {{ result.psu.price }} грн</p>
-        <p><span>Материнка:</span> {{ result.motherboard.name }} — {{ result.motherboard.price }} грн</p>
+    <div class="result-section">
+        <div class="card-grid">
+            <div class="part-card"><b>Процесор</b> {{ result.cpu.name }} ({{ result.cpu.price }} грн)</div>
+            <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:"Вбудована" }} ({{ result.gpu.price|default:"0" }} грн)</div>
+            <div class="part-card"><b>Материнка</b> {{ result.motherboard.name }} ({{ result.motherboard.price }} грн)</div>
+            <div class="part-card"><b>ОЗП (RAM)</b> {{ result.ram.name }} ({{ result.ram.price }} грн)</div>
+            <div class="part-card"><b>SSD/HDD</b> {{ result.storage.name }} ({{ result.storage.price }} грн)</div>
+            <div class="part-card"><b>Блок живлення</b> {{ result.psu.name }} ({{ result.psu.price }} грн)</div>
+        </div>
 
-        <h3>💰 Загальна ціна: {{ result.total }} грн</h3>
+        <div class="total-banner">
+            💰 ПІДСУМОК: {{ result.total }} грн
+        </div>
+        
+
+        <div class="explanation-box">
+            <h4>🤖 Обґрунтування експертної системи:</h4>
+            <ul>
+                <li>Конфігурація оптимізована під тип: <b>{{ selected_type }}</b> (Продуктивність: {{ result.power }}%).</li>
+                <li>Материнська плата підібрана під сокет <span class="tag">{{ result.cpu.socket }}</span>.</li>
+                <li>Оперативна пам'ять сумісна з типом <span class="tag">{{ result.motherboard.ram_type }}</span>.</li>
+                <li>Потужність БЖ розрахована для стабільної роботи всіх вузлів.</li>
+            </ul>
+        </div>
+        <form action="/save/" method="POST">
+    {% csrf_token %}
+    <button>💾 Зберегти конфігурацію</button>
+</form>
+
+<a href="/builds/">📂 Мої збірки</a>
     </div>
     {% endif %}
 </div>
