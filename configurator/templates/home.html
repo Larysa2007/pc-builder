@@ -188,21 +188,20 @@
             </ul>
         </div>
 
-       <form action="{% url 'save_build' %}" method="POST" style="margin-top: 20px;">
-    {% csrf_token %}
-    <input type="hidden" name="cpu_name" value="{{ result.cpu.name }}">
-    <input type="hidden" name="gpu_name" value="{{ result.gpu.name|default:'Вбудована' }}">
-    <input type="hidden" name="mb_name" value="{{ result.motherboard.name|default:'Не знайдено' }}">
-    <input type="hidden" name="ram_name" value="{{ result.ram.name }}">
-    <input type="hidden" name="storage_name" value="{{ result.storage.name }}">
-    <input type="hidden" name="psu_name" value="{{ result.psu.name }}">
-    
-    <input type="hidden" name="total_price" value="{{ result.total }}">
+        <form action="{% url 'save_build' %}" method="POST" style="margin-top: 20px; display: block;">
+            {% csrf_token %}
+            <input type="hidden" name="cpu_name" value="{{ result.cpu.name }}">
+            <input type="hidden" name="gpu_name" value="{{ result.gpu.name|default:'Вбудована' }}">
+            <input type="hidden" name="mb_name" value="{{ result.motherboard.name|default:'Не знайдено' }}">
+            <input type="hidden" name="ram_name" value="{{ result.ram.name }}">
+            <input type="hidden" name="storage_name" value="{{ result.storage.name }}">
+            <input type="hidden" name="psu_name" value="{{ result.psu.name }}">
+            <input type="hidden" name="total_price" value="{{ result.total }}">
 
-    <button type="submit" style="background: #00ff88; color: black; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none;">
-        💾 ЗБЕРЕГТИ КОНФІГУРАЦІЮ
-    </button>
-</form>
+            <button type="submit" style="background: #00ff88; color: black; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; margin-top: 10px;">
+                💾 ЗБЕРЕГТИ ЦЮ ЗБІРКУ
+            </button>
+        </form>
 
         <div style="margin-top: 15px;">
             <a href="{% url 'view_builds' %}" style="color: #00d2ff; text-decoration: none; font-weight: bold;">📂 Перейти до моїх збірок</a>
