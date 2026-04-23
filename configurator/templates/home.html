@@ -72,9 +72,7 @@
             box-sizing: border-box;
         }
 
-        .full-width { grid-column: span 2; }
-
-        button {
+        button.main-btn {
             grid-column: span 2;
             padding: 15px;
             background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
@@ -87,7 +85,7 @@
             transition: 0.3s;
         }
 
-        button:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+        button.main-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
 
         .error-msg {
             background: rgba(255, 71, 87, 0.1);
@@ -164,7 +162,7 @@
             <input type="number" name="budget" value="{{ selected_budget }}" placeholder="Мін. 5000" required>
         </div>
 
-        <button type="submit">Сформувати конфігурацію</button>
+        <button type="submit" class="main-btn">Сформувати конфігурацію</button>
     </form>
 
     {% if result %}
@@ -172,32 +170,43 @@
         <div class="card-grid">
             <div class="part-card"><b>Процесор</b> {{ result.cpu.name }} ({{ result.cpu.price }} грн)</div>
             <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:"Вбудована" }} ({{ result.gpu.price|default:"0" }} грн)</div>
-            <div class="part-card"><b>Материнка</b> {{ result.motherboard.name }} ({{ result.motherboard.price }} грн)</div>
+            <div class="part-card"><b>Материнка</b> {{ result.motherboard.name|default:"Не знайдено" }} ({{ result.motherboard.price|default:"0" }} грн)</div>
             <div class="part-card"><b>ОЗП (RAM)</b> {{ result.ram.name }} ({{ result.ram.price }} грн)</div>
             <div class="part-card"><b>SSD/HDD</b> {{ result.storage.name }} ({{ result.storage.price }} грн)</div>
             <div class="part-card"><b>Блок живлення</b> {{ result.psu.name }} ({{ result.psu.price }} грн)</div>
         </div>
 
-        <div class="total-banner">
-            💰 ПІДСУМОК: {{ result.total }} грн
-        </div>
-        
+        <div class="total-banner">💰 ПІДСУМОК: {{ result.total }} грн</div>
 
         <div class="explanation-box">
             <h4>🤖 Обґрунтування експертної системи:</h4>
             <ul>
                 <li>Конфігурація оптимізована під тип: <b>{{ selected_type }}</b> (Продуктивність: {{ result.power }}%).</li>
                 <li>Материнська плата підібрана під сокет <span class="tag">{{ result.cpu.socket }}</span>.</li>
-                <li>Оперативна пам'ять сумісна з типом <span class="tag">{{ result.motherboard.ram_type }}</span>.</li>
+                <li>Оперативна пам'ять сумісна з типом <span class="tag">{{ result.motherboard.ram_type|default:"DDR4" }}</span>.</li>
                 <li>Потужність БЖ розрахована для стабільної роботи всіх вузлів.</li>
             </ul>
         </div>
-        <form action="/save/" method="POST">
+
+       <form action="{% url 'save_build' %}" method="POST" style="margin-top: 20px;">
     {% csrf_token %}
-    <button>💾 Зберегти конфігурацію</button>
+    <input type="hidden" name="cpu_name" value="{{ result.cpu.name }}">
+    <input type="hidden" name="gpu_name" value="{{ result.gpu.name|default:'Вбудована' }}">
+    <input type="hidden" name="mb_name" value="{{ result.motherboard.name|default:'Не знайдено' }}">
+    <input type="hidden" name="ram_name" value="{{ result.ram.name }}">
+    <input type="hidden" name="storage_name" value="{{ result.storage.name }}">
+    <input type="hidden" name="psu_name" value="{{ result.psu.name }}">
+    
+    <input type="hidden" name="total_price" value="{{ result.total }}">
+
+    <button type="submit" style="background: #00ff88; color: black; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none;">
+        💾 ЗБЕРЕГТИ КОНФІГУРАЦІЮ
+    </button>
 </form>
 
-<a href="/builds/">📂 Мої збірки</a>
+        <div style="margin-top: 15px;">
+            <a href="{% url 'view_builds' %}" style="color: #00d2ff; text-decoration: none; font-weight: bold;">📂 Перейти до моїх збірок</a>
+        </div>
     </div>
     {% endif %}
 </div>
