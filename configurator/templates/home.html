@@ -14,29 +14,33 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--dark-bg);
+            background-image: radial-gradient(circle at 50% 50%, #1a1f2c 0%, #0b0e14 100%);
             color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
 
         .container {
             background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
             padding: 40px;
             border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             width: 100%;
             max-width: 850px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
             text-transform: uppercase;
         }
 
@@ -49,7 +53,7 @@
 
         .group { text-align: left; }
 
-        label { display: block; margin-bottom: 8px; color: #94a3b8; }
+        label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 0.9rem; }
 
         select, input {
             width: 100%;
@@ -58,6 +62,7 @@
             border: 2px solid #334155;
             background: #0f172a;
             color: white;
+            font-size: 1rem;
             box-sizing: border-box;
         }
 
@@ -65,12 +70,16 @@
             grid-column: span 2;
             padding: 15px;
             background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
+            color: #000;
             border: none;
             border-radius: 10px;
-            font-weight: bold;
             cursor: pointer;
+            font-weight: 800;
             text-transform: uppercase;
+            transition: 0.3s;
         }
+
+        .main-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
 
         .card-grid {
             display: grid;
@@ -83,19 +92,33 @@
             background: rgba(255, 255, 255, 0.05);
             padding: 15px;
             border-radius: 12px;
-            text-align: left;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
         }
 
-        .part-card b { color: var(--neon-blue); display: block; font-size: 0.8rem; }
+        .part-card b { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-bottom: 5px; }
 
         .info-box {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: left;
+            margin-top: 25px;
             background: rgba(255, 71, 87, 0.1);
             border: 1px solid #ff4757;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .info-box ul { padding-left: 20px; color: #ff4757; }
+        .info-box b { color: #ff4757; }
+
+        .total-banner {
+            margin-top: 25px;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            font-weight: bold;
+            padding: 15px;
+            border: 1px solid var(--neon-green);
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -116,7 +139,7 @@
         </div>
 
         <div class="group">
-            <label>Бюджет (від 5000 грн):</label>
+            <label>Бюджет (мін. 5000 грн):</label>
             <input type="number" name="budget" min="5000" value="{{ selected_budget|default:5000 }}" required>
         </div>
 
@@ -127,22 +150,22 @@
         <div class="card-grid">
             <div class="part-card"><b>Процесор</b> {{ result.cpu.name }} ({{ result.cpu.price }} грн)</div>
             <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:"Вбудована" }} ({{ result.gpu.price|default:"0" }} грн)</div>
-            <div class="part-card"><b>Материнка</b> {{ result.motherboard.name }}</div>
-            <div class="part-card"><b>ОЗП (RAM)</b> {{ result.ram.name }}</div>
+            <div class="part-card"><b>Материнська плата</b> {{ result.motherboard.name }}</div>
+            <div class="part-card"><b>Оперативна пам'ять</b> {{ result.ram.name }}</div>
             <div class="part-card"><b>Накопичувач</b> {{ result.storage.name }}</div>
             <div class="part-card"><b>Блок живлення</b> {{ result.psu.name }}</div>
         </div>
-        <h2 style="color: #fbbf24;">💰 ПІДСУМОК: {{ result.total }} грн</h2>
+        <div class="total-banner">💰 ПІДСУМОК: {{ result.total }} грн</div>
     
     {% elif selected_budget %}
         <div class="info-box">
-            <h4 style="color: #ff4757; margin-top: 0;">⚠️ Конфігурацію не знайдено</h4>
-            <p>Вашого бюджету ({{ selected_budget }} грн) замало для збірки з тими деталями, що є в базі.</p>
-            <p><b>Рекомендації системи:</b></p>
+            <h4 style="margin: 0 0 10px 0;">⚠️ Конфігурацію не знайдено</h4>
+            <p>Вашого бюджету ({{ selected_budget }} грн) недостатньо для збірки з поточними деталями в базі.</p>
+            <p><b>Мінімальні вимоги системи:</b></p>
             <ul>
-                <li>Мінімальний бюджет для офісного ПК: <b>8 000 грн</b>.</li>
-                <li>Мінімальний бюджет для ігрового ПК: <b>25 000 грн</b>.</li>
-                <li>Перевірте в адмінці, чи є у вас сумісні деталі (однаковий сокет).</li>
+                <li><b>Офісний ПК:</b> від 8 000 грн.</li>
+                <li><b>Ігровий ПК:</b> від 25 000 грн (через ціну відеокарти).</li>
+                <li>Переконайтеся, що в базі є сумісні деталі (однаковий сокет).</li>
             </ul>
         </div>
     {% endif %}
