@@ -125,6 +125,16 @@
         }
         
         .tag { color: var(--neon-blue); font-weight: bold; }
+
+        .alert-box {
+            margin-top: 20px;
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -140,13 +150,12 @@
                 <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий</option>
                 <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісний</option>
                 <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Для роботи / Рендеру</option>
-                <option value="stream" {% if selected_type == 'stream' %}selected{% endif %}>🎥 Для Стрімінгу</option>
             </select>
         </div>
 
         <div class="input-group">
-            <label>Бюджет (грн):</label>
-            <input type="number" name="budget" value="{{ selected_budget|default:15000 }}" required>
+            <label>Ваш бюджет (грн):</label>
+            <input type="number" name="budget" value="{{ selected_budget|default:15000 }}" placeholder="Наприклад, 20000" required>
         </div>
 
         <button type="submit" class="main-btn">Сформувати конфігурацію</button>
@@ -166,15 +175,31 @@
         <div class="total-banner">💰 ПІДСУМОК: {{ result.total }} грн</div>
 
         <div class="explanation-box">
-            <h4>🤖 Обґрунтування експертної системи:</h4>
+            <h4>🤖 Аналіз експертної системи:</h4>
             <ul>
-                <li>Оптимізовано під тип: <b>{{ selected_type }}</b>.</li>
-                <li>Сумісність сокету: <span class="tag">{{ result.cpu.socket }}</span>.</li>
-                <li>Тип пам'яті: <span class="tag">{{ result.motherboard.ram_type|default:"DDR4" }}</span>.</li>
+                <li>Вибрано платформу на сокеті <span class="tag">{{ result.cpu.socket }}</span>.</li>
+                <li>Материнська плата підтримує <span class="tag">{{ result.motherboard.ram_type|default:"DDR4" }}</span>.</li>
+                <li>Всі компоненти перевірено на енергоспоживання та фізичну сумісність.</li>
             </ul>
         </div>
     </div>
+
+    {% elif selected_budget %}
+    <div class="alert-box">
+        <h4>⚠️ Конфігурацію не знайдено</h4>
+        <p>Вашого бюджету ({{ selected_budget }} грн) недостатньо для збірки з поточними деталями в базі.</p>
+        <p><b>Мінімальні вимоги системи:</b></p>
+        <ul>
+            <li><b>Офісний ПК:</b> від 8 000 грн.</li>
+            <li><b>Ігровий ПК:</b> від 25 000 грн (через ціну відеокарти).</li>
+            <li>Переконайтеся, що в базі є сумісні деталі (однаковий сокет).</li>
+        </ul>
+    </div>
     {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'view_builds' %}" style="color: var(--neon-blue); text-decoration: none; font-size: 0.9rem;">📂 Перейти до збережених збірок</a>
+    </div>
 </div>
 
 </body>
