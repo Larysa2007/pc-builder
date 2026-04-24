@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC Configurator Pro — Експертна Система</title>
+    <title>PC Configurator Pro</title>
     <style>
         :root {
             --neon-blue: #00d2ff;
@@ -31,7 +31,7 @@
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             width: 100%;
-            max-width: 850px;
+            max-width: 800px;
             text-align: center;
         }
 
@@ -48,11 +48,10 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .group { text-align: left; }
-
         label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 0.9rem; }
 
         select, input {
@@ -98,28 +97,25 @@
 
         .part-card b { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-bottom: 5px; }
 
-        .info-box {
+        .total-price {
             margin-top: 25px;
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid #ff4757;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .explanation-box {
+            margin-top: 25px;
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px dashed var(--neon-blue);
             border-radius: 12px;
             padding: 20px;
             text-align: left;
             font-size: 0.9rem;
         }
-
-        .info-box ul { padding-left: 20px; color: #ff4757; }
-        .info-box b { color: #ff4757; }
-
-        .total-banner {
-            margin-top: 25px;
-            font-size: 1.5rem;
-            color: #fbbf24;
-            font-weight: bold;
-            padding: 15px;
-            border: 1px solid var(--neon-green);
-            border-radius: 10px;
-        }
+        
+        .explanation-box h4 { color: var(--neon-blue); margin-top: 0; }
+        .explanation-box ul { padding-left: 20px; color: #cbd5e1; }
     </style>
 </head>
 <body>
@@ -134,16 +130,17 @@
             <select name="pc_type">
                 <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий</option>
                 <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісний</option>
-                <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Робочий</option>
             </select>
         </div>
 
         <div class="group">
-            <label>Бюджет (мін. 5000 грн):</label>
-            <input type="number" name="budget" min="5000" value="{{ selected_budget|default:5000 }}" required>
+            <label>Бюджет (мінімум 5000 грн):</label>
+            <input type="number" name="budget" min="5000" 
+                   value="{{ selected_budget|default:5000 }}" 
+                   placeholder="від 5000 грн" required>
         </div>
 
-        <button type="submit" class="main-btn">Сформувати конфігурацію</button>
+        <button type="submit" class="main-btn">СФОРМУВАТИ КОНФІГУРАЦІЮ</button>
     </form>
 
     {% if result %}
@@ -155,17 +152,16 @@
             <div class="part-card"><b>Накопичувач</b> {{ result.storage.name }}</div>
             <div class="part-card"><b>Блок живлення</b> {{ result.psu.name }}</div>
         </div>
-        <div class="total-banner">💰 ПІДСУМОК: {{ result.total }} грн</div>
-    
-    {% elif selected_budget %}
-        <div class="info-box">
-            <h4 style="margin: 0 0 10px 0;">⚠️ Конфігурацію не знайдено</h4>
-            <p>Вашого бюджету ({{ selected_budget }} грн) недостатньо для збірки з поточними деталями в базі.</p>
-            <p><b>Мінімальні вимоги системи:</b></p>
+
+        <div class="total-price">💰 ПІДСУМОК: {{ result.total }} грн</div>
+
+        <div class="explanation-box">
+            <h4>🤖 Аналіз експертної системи:</h4>
             <ul>
-                <li><b>Офісний ПК:</b> від 8 000 грн.</li>
-                <li><b>Ігровий ПК:</b> від 25 000 грн (через ціну відеокарти).</li>
-                <li>Переконайтеся, що в базі є сумісні деталі (однаковий сокет).</li>
+                <li><b>Сумісність:</b> Процесор та материнська плата перевірені на відповідність сокету.</li>
+                <li><b>Тип пам'яті:</b> Модулі ОЗП відповідають стандарту, який підтримує обрана плата.</li>
+                <li><b>Бюджет:</b> Компоненти вибрані як найбільш оптимальні за ціною для типу <b>{% if selected_type == 'gaming' %}Ігровий{% else %}Офісний{% endif %}</b>.</li>
+                <li><b>Живлення:</b> Потужність БЖ розрахована з урахуванням пікового навантаження всіх деталей.</li>
             </ul>
         </div>
     {% endif %}
