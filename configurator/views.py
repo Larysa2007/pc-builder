@@ -10,7 +10,7 @@ def home(request):
     if request.method == "POST" and budget_str:
         try:
             budget = int(budget_str)
-            # Коефіцієнти розподілу бюджету та метадані для аналізу
+            # Коефіцієнти розподілу бюджету
             ratios = {
                 "gaming": {'cpu': 0.25, 'gpu': 0.40, 'ram': 0.12, 'ssd': 0.08, 'psu': 0.07, 'mb': 0.08, 'score': 95, 'name': "Ігровий ПК"},
                 "office": {'cpu': 0.40, 'gpu': 0.05, 'ram': 0.15, 'ssd': 0.15, 'psu': 0.10, 'mb': 0.15, 'score': 50, 'name': "Офісний ПК"},
@@ -19,28 +19,29 @@ def home(request):
             }
             ratio = ratios.get(pc_type, ratios["gaming"])
 
-            # Підбір процесора (з невеликим запасом по ціні +10%)
-            cpu = Cpu.objects.filter(price__lte=budget * (ratio['cpu'] + 0.10)).order_by('-price').first()
+            # 1. Підбір процесора (+15% гнучкості до бюджету)
+            cpu = Cpu.objects.filter(price__lte=budget * (ratio['cpu'] + 0.15)).order_by('-price').first()
             
             if cpu:
-                # Підбір материнської плати за сокетом процесора
+                # 2. Материнська плата (сумісна за сокетом)
                 motherboard = Motherboard.objects.filter(socket=cpu.socket, price__lte=budget * (ratio['mb'] + 0.10)).order_by('-price').first()
                 if not motherboard:
                     motherboard = Motherboard.objects.filter(socket=cpu.socket).order_by('price').first()
 
-                # Підбір оперативної пам'яті (відповідно до типу плати)
-                ram = Ram.objects.filter(ram_type=motherboard.ram_type if motherboard else "DDR4", price__lte=budget * (ratio['ram'] + 0.05)).order_by('-price').first()
+                # 3. Оперативна пам'ять
+                ram = Ram.objects.filter(ram_type=motherboard.ram_type if motherboard else "DDR4", price__lte=budget * (ratio['ram'] + 0.10)).order_by('-price').first()
                 
-                # Відеокарта, Накопичувач та Блок живлення
+                # 4. Відеокарта (якщо грошей мало — шукаємо найдешевшу або лишаємо вбудовану)
                 gpu = Gpu.objects.filter(price__lte=budget * (ratio['gpu'] + 0.10)).order_by('-price').first()
-                storage = Storage.objects.filter(price__lte=budget * (ratio['ssd'] + 0.05)).order_by('-price').first()
-                psu = Psu.objects.filter(price__lte=budget * (ratio['psu'] + 0.05)).order_by('-price').first()
+                
+                # 5. Інші компоненти
+                storage = Storage.objects.filter(price__lte=budget * (ratio['ssd'] + 0.10)).order_by('-price').first()
+                psu = Psu.objects.filter(price__lte=budget * (ratio['psu'] + 0.10)).order_by('-price').first()
 
-                # Рахуємо загальну вартість
+                # Рахуємо загальну суму знайдених деталей
                 items = [cpu, gpu, ram, storage, psu, motherboard]
                 total = sum(item.price for item in items if item)
-                
-                # Формуємо словник result (всі назви тепер збігаються з HTML)
+
                 result = {
                     "cpu": cpu,
                     "gpu": gpu,
@@ -52,8 +53,11 @@ def home(request):
                     "power": ratio['score'],
                     "type_name": ratio['name']
                 }
+            else:
+                error = f"На жаль, у базі немає процесорів, що підходять під бюджет {budget} грн."
+                
         except ValueError:
-            error = "Введіть коректне числове значення."
+            error = "Будь ласка, введіть числове значення бюджету."
 
     return render(request, "home.html", {
         "result": result, 
