@@ -87,15 +87,6 @@
 
         button.main-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
 
-        .error-msg {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid #ff4757;
-            color: #ff4757;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
         .card-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -141,10 +132,6 @@
 <div class="container">
     <h1>🚀 PC Configurator Pro</h1>
 
-    {% if error %}
-        <div class="error-msg">{{ error }}</div>
-    {% endif %}
-
     <form method="POST">
         {% csrf_token %}
         <div class="input-group">
@@ -159,7 +146,7 @@
 
         <div class="input-group">
             <label>Бюджет (грн):</label>
-            <input type="number" name="budget" value="{{ selected_budget }}" placeholder="Мін. 5000" required>
+            <input type="number" name="budget" value="{{ selected_budget|default:15000 }}" required>
         </div>
 
         <button type="submit" class="main-btn">Сформувати конфігурацію</button>
@@ -181,30 +168,10 @@
         <div class="explanation-box">
             <h4>🤖 Обґрунтування експертної системи:</h4>
             <ul>
-                <li>Конфігурація оптимізована під тип: <b>{{ selected_type }}</b> (Продуктивність: {{ result.power }}%).</li>
-                <li>Материнська плата підібрана під сокет <span class="tag">{{ result.cpu.socket }}</span>.</li>
-                <li>Оперативна пам'ять сумісна з типом <span class="tag">{{ result.motherboard.ram_type|default:"DDR4" }}</span>.</li>
-                <li>Потужність БЖ розрахована для стабільної роботи всіх вузлів.</li>
+                <li>Оптимізовано під тип: <b>{{ selected_type }}</b>.</li>
+                <li>Сумісність сокету: <span class="tag">{{ result.cpu.socket }}</span>.</li>
+                <li>Тип пам'яті: <span class="tag">{{ result.motherboard.ram_type|default:"DDR4" }}</span>.</li>
             </ul>
-        </div>
-
-        <form action="{% url 'save_build' %}" method="POST" style="margin-top: 20px; display: block;">
-            {% csrf_token %}
-            <input type="hidden" name="cpu_name" value="{{ result.cpu.name }}">
-            <input type="hidden" name="gpu_name" value="{{ result.gpu.name|default:'Вбудована' }}">
-            <input type="hidden" name="mb_name" value="{{ result.motherboard.name|default:'Не знайдено' }}">
-            <input type="hidden" name="ram_name" value="{{ result.ram.name }}">
-            <input type="hidden" name="storage_name" value="{{ result.storage.name }}">
-            <input type="hidden" name="psu_name" value="{{ result.psu.name }}">
-            <input type="hidden" name="total_price" value="{{ result.total }}">
-
-            <button type="submit" style="background: #00ff88; color: black; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; margin-top: 10px;">
-                💾 ЗБЕРЕГТИ ЦЮ ЗБІРКУ
-            </button>
-        </form>
-
-        <div style="margin-top: 15px;">
-            <a href="{% url 'view_builds' %}" style="color: #00d2ff; text-decoration: none; font-weight: bold;">📂 Перейти до моїх збірок</a>
         </div>
     </div>
     {% endif %}
