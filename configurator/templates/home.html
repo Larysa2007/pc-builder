@@ -5,117 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PC Configurator Pro</title>
     <style>
-        :root {
-            --neon-blue: #00d2ff;
-            --neon-green: #00ff88;
-            --dark-bg: #0b0e14;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--dark-bg);
-            background-image: radial-gradient(circle at 50% 50%, #1a1f2c 0%, #0b0e14 100%);
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-        }
-
-        .input-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
+        :root { --neon-blue: #00d2ff; --neon-green: #00ff88; --dark-bg: #0b0e14; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 850px; text-align: center; }
+        h1 { background: linear-gradient(to right, var(--neon-blue), var(--neon-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.2rem; text-transform: uppercase; margin-bottom: 30px; }
+        .input-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         .group { text-align: left; }
         label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 0.9rem; }
-
-        select, input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 2px solid #334155;
-            background: #0f172a;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        .main-btn {
-            grid-column: span 2;
-            padding: 15px;
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 800;
-            text-transform: uppercase;
-            transition: 0.3s;
-        }
-
+        select, input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #334155; background: #0f172a; color: white; font-size: 1rem; box-sizing: border-box; }
+        .main-btn { grid-column: span 2; padding: 15px; background: linear-gradient(45deg, var(--neon-blue), var(--neon-green)); color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; text-transform: uppercase; transition: 0.3s; }
         .main-btn:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .part-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: left;
-        }
-
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-top: 20px; }
+        .part-card { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: left; }
         .part-card b { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-bottom: 5px; }
-
-        .total-price {
-            margin-top: 25px;
-            font-size: 1.5rem;
-            color: #fbbf24;
-            font-weight: bold;
-        }
-
-        .explanation-box {
-            margin-top: 25px;
-            background: rgba(0, 210, 255, 0.05);
-            border: 1px dashed var(--neon-blue);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-        
+        .total-price { margin-top: 25px; font-size: 1.6rem; color: #fbbf24; font-weight: bold; border: 1px solid #fbbf24; padding: 15px; border-radius: 12px; }
+        .explanation-box { margin-top: 25px; background: rgba(0, 210, 255, 0.05); border: 1px dashed var(--neon-blue); border-radius: 12px; padding: 20px; text-align: left; }
         .explanation-box h4 { color: var(--neon-blue); margin-top: 0; }
-        .explanation-box ul { padding-left: 20px; color: #cbd5e1; }
+        .explanation-box ul { padding-left: 20px; color: #cbd5e1; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -130,14 +36,14 @@
             <select name="pc_type">
                 <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий</option>
                 <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісний</option>
+                <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Робоча станція</option>
+                <option value="stream" {% if selected_type == 'stream' %}selected{% endif %}>🎥 Стрімінг</option>
             </select>
         </div>
 
         <div class="group">
             <label>Бюджет (мін. 5000 грн):</label>
-            <input type="number" name="budget" min="5000" 
-                   value="{{ selected_budget|default:5000 }}" 
-                   placeholder="від 5000 грн" required>
+            <input type="number" name="budget" min="5000" value="{{ selected_budget|default:15000 }}" placeholder="від 5000 грн" required>
         </div>
 
         <button type="submit" class="main-btn">СФОРМУВАТИ КОНФІГУРАЦІЮ</button>
@@ -145,12 +51,12 @@
 
     {% if result %}
         <div class="card-grid">
-            <div class="part-card"><b>Процесор</b> {{ result.cpu.name }} ({{ result.cpu.price }} грн)</div>
-            <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:"Вбудована" }} ({{ result.gpu.price|default:"0" }} грн)</div>
-            <div class="part-card"><b>Материнська плата</b> {{ result.motherboard.name }}</div>
-            <div class="part-card"><b>Оперативна пам'ять</b> {{ result.ram.name }}</div>
-            <div class="part-card"><b>Накопичувач</b> {{ result.storage.name }}</div>
-            <div class="part-card"><b>Блок живлення</b> {{ result.psu.name }}</div>
+            <div class="part-card"><b>Процесор</b> {{ result.cpu.name|default:result.cpu }} ({{ result.cpu.price }} грн)</div>
+            <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:result.gpu|default:"Вбудована" }} ({{ result.gpu.price|default:0 }} грн)</div>
+            <div class="part-card"><b>Материнська плата</b> {{ result.motherboard.name|default:result.motherboard|default:"Не знайдено" }}</div>
+            <div class="part-card"><b>Оперативна пам'ять</b> {{ result.ram.name|default:result.ram|default:"8GB DDR4" }}</div>
+            <div class="part-card"><b>Накопичувач</b> {{ result.storage.name|default:result.storage|default:"SSD 480GB" }}</div>
+            <div class="part-card"><b>Блок живлення</b> {{ result.psu.name|default:result.psu|default:"500W Bronze" }}</div>
         </div>
 
         <div class="total-price">💰 ПІДСУМОК: {{ result.total }} грн</div>
@@ -158,9 +64,9 @@
         <div class="explanation-box">
             <h4>🤖 Аналіз експертної системи:</h4>
             <ul>
-                <li><b>Сумісність:</b> Процесор та материнська плата перевірені за сокетом.</li>
-                <li><b>Пам'ять:</b> ОЗП відповідає стандарту материнської плати.</li>
-                <li><b>Тип:</b> Конфігурацію оптимізовано під {% if selected_type == 'gaming' %}ігрові навантаження{% else %}офісну роботу{% endif %}.</li>
+                <li><b>Сумісність:</b> Процесор та плата перевірені за сокетом {{ result.cpu.socket }}.</li>
+                <li><b>Тип:</b> Конфігурацію оптимізовано під <b>{{ result.type_name }}</b>.</li>
+                <li><b>Продуктивність:</b> Рівень системи оцінено у {{ result.power }}/100.</li>
             </ul>
         </div>
     {% endif %}
