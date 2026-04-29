@@ -1,13 +1,19 @@
+/* Базові налаштування */
 body {
     background: linear-gradient(135deg, #020617, #0f172a);
     color: white;
-    font-family: Arial;
+    font-family: 'Segoe UI', Arial, sans-serif; /* Трохи сучасніший шрифт */
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
 }
 
+/* Контейнер тепер адаптивний */
 .container {
-    max-width: 600px;
-    margin: auto;
-    padding: 20px;
+    width: 90%;          /* На малих екранах займає 90% ширини */
+    max-width: 800px;    /* На великих екранах не розповзається більше 800px */
+    margin: 20px auto;
+    padding: 15px;
     text-align: center;
 }
 
@@ -15,21 +21,32 @@ form {
     margin-top: 20px;
 }
 
+/* Поля вводу тепер мають box-sizing, щоб не вилазити за краї */
 input, select {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin: 10px 0;
     border-radius: 10px;
-    border: none;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: white;
+    box-sizing: border-box; /* Важливо для мобілок! */
 }
 
 button {
     background: #22c55e;
-    padding: 10px;
+    padding: 15px;
     border: none;
     border-radius: 10px;
     color: white;
     width: 100%;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #16a34a;
 }
 
 .error {
@@ -39,29 +56,50 @@ button {
     border-radius: 10px;
 }
 
-/* cards */
+/* Адаптивні картки (Cards) */
 .cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    /* Це магія: на комп'ютері 2 колонки, на телефоні - 1 */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
     margin-top: 20px;
 }
 
 .card {
     background: #1e293b;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    text-align: left; /* Текст всередині карток краще зліва */
 }
 
-/* power */
+/* Power Bar */
 .power-bar {
     background: #111;
-    height: 10px;
+    height: 12px;
     border-radius: 10px;
     margin-top: 10px;
+    overflow: hidden;
 }
 
 .power-fill {
     height: 100%;
-    background: #22c55e;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    transition: width 0.5s ease-in-out;
+}
+
+/* Спеціальні налаштування для маленьких екранів */
+@media (max-width: 480px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.5rem; /* Зменшуємо заголовок на мобілках */
+    }
+
+    .card {
+        padding: 10px;
+    }
 }
