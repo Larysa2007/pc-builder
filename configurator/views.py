@@ -6,6 +6,7 @@ def home(request):
     error = None
     pc_type = request.POST.get("pc_type")
     budget_str = request.POST.get("budget")
+    remainder = 0  # Змінна для залишку
 
     if request.method == "POST" and budget_str:
         try:
@@ -18,7 +19,6 @@ def home(request):
             }
             ratio = ratios.get(pc_type, ratios["gaming"])
 
-            # Функція "м'якого" пошуку: шукає в межах ціни, а якщо немає - бере найдешевше
             def find_part(model, max_price, extra_filters={}):
                 part = model.objects.filter(**extra_filters, price__lte=max_price).order_by('-price').first()
                 if not part:
@@ -29,7 +29,7 @@ def home(request):
             cpu = find_part(Cpu, budget * ratio['cpu'])
             
             if cpu:
-                # 2. Знаходимо материнку ПІД ЦЕЙ процесор (найважливіша сумісність)
+                # 2. Знаходимо материнку ПІД ЦЕЙ процесор
                 mb = find_part(Motherboard, budget * ratio['mb'], {'socket': cpu.socket})
                 
                 if mb:
@@ -41,30 +41,38 @@ def home(request):
 
                     items = [cpu, mb, gpu, ram, storage, psu]
                     total = sum(item.price for item in items if item)
+                    
+                    # Розрахунок залишку
+                    remainder = budget - total
 
-                    # Перевірка: якщо після підбору "найдешевшого" ми все одно вилізли за бюджет
                     if total > budget:
                         error = f"На жаль, навіть мінімальна збірка коштує {total} грн. Бюджету {budget} недостатньо."
                     else:
                         result = {
                             "cpu": cpu, "gpu": gpu, "ram": ram, "storage": storage,
                             "psu": psu, "motherboard": mb, "total": total,
-                            "power": ratio['score'], "type_name": ratio['name']
+                            "power": ratio['score'], "type_name": ratio['name'],
+                            "remainder": remainder # Передаємо залишок в результат
                         }
                 else:
-                    error = "У базі немає материнської плати для цього процесора."
+                    error = f"У базі немає материнської плати з сокетом {cpu.socket}."
             else:
                 error = "У базі немає жодного процесора."
 
         except ValueError:
             error = "Введіть числове значення бюджету."
 
-    return render(request, "home.html", {"result": result, "error": error, "selected_type": pc_type, "selected_budget": budget_str})
+    return render(request, "home.html", {
+        "result": result, 
+        "error": error, 
+        "selected_type": pc_type, 
+        "selected_budget": budget_str,
+        "remainder": remainder # Додатково для шаблону
+    })
 
-# Додай це в кінець файлу views.py
 def save_build(request):
     if request.method == "POST":
-        from .models import Build # переконайся, що імпорт правильний
+        # Створення запису в базі даних на основі отриманих з форми даних
         Build.objects.create(
             cpu=request.POST.get("cpu_name"),
             gpu=request.POST.get("gpu_name"),
@@ -78,6 +86,6 @@ def save_build(request):
     return redirect('home')
 
 def view_builds(request):
-    from .models import Build
+    # Отримання всіх збережених збірок для відображення на окремій сторінці
     builds = Build.objects.all().order_by('-id')
     return render(request, 'builds.html', {'builds': builds})
