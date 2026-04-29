@@ -61,7 +61,23 @@ def home(request):
 
     return render(request, "home.html", {"result": result, "error": error, "selected_type": pc_type, "selected_budget": budget_str})
 
+# Додай це в кінець файлу views.py
+def save_build(request):
+    if request.method == "POST":
+        from .models import Build # переконайся, що імпорт правильний
+        Build.objects.create(
+            cpu=request.POST.get("cpu_name"),
+            gpu=request.POST.get("gpu_name"),
+            motherboard=request.POST.get("mb_name"),
+            ram=request.POST.get("ram_name"),
+            storage=request.POST.get("storage_name"),
+            psu=request.POST.get("psu_name"),
+            total_price=request.POST.get("total_price")
+        )
+        return redirect('view_builds')
+    return redirect('home')
 
 def view_builds(request):
+    from .models import Build
     builds = Build.objects.all().order_by('-id')
     return render(request, 'builds.html', {'builds': builds})
