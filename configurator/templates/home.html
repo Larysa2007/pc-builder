@@ -68,14 +68,14 @@
         <div class="total-price">💰 {{ result.total }} грн</div>
 
         <div class="explanation-box">
-            <h4>🤖 Аналіз експертної системи:</h4>
+            <h4>🤖 Детальний аналіз:</h4>
             <ul>
-                <li><b>Сумісність:</b> Деталі підібрані за сокетом {{ result.cpu.socket|default:"-" }}.</li>
-                <li><b>Тип:</b> Конфігурацію оптимізовано під <b>{{ result.type_name }}</b>.</li>
-                <li><b>Продуктивність:</b> Рівень системи оцінено у {{ result.power }}/100.</li>
+                {% for text in result.explanation %}
+                <li>{{ text }}</li>
+                {% endfor %}
             </ul>
         </div>
-    {% endif %}
-</div>
-</body>
-</html>
+
+        <hr style="margin:40px 0;">
+    {% endfor %}
+{% endif %}
