@@ -88,37 +88,67 @@ button:hover {
     transition: width 0.5s ease-in-out;
 }
 
-/* Спеціальні налаштування для маленьких екранів */
-@media (max-width: 480px) {
-    .container {
-        width: 95%;
-        padding: 10px;
-    }
-    
-    h1 {
-        font-size: 1.5rem; /* Зменшуємо заголовок на мобілках */
-    }
-
-    .card {
-        padding: 10px;
-    }
-}
-/* Налаштування для мобільних телефонів */
+/* Базові налаштування для мобільних (додайте це в кінець вашого CSS) */
 @media (max-width: 768px) {
+    /* Робимо контейнер вужчим, щоб не було зайвих відступів */
     .container {
-        width: 95%;
-        padding: 10px;
-    }
-    
-    /* Щоб випадаючі списки були на всю ширину */
-    select, input {
-        width: 100% !important;
-        margin-bottom: 15px;
+        width: 95% !important;
+        padding: 10px !important;
     }
 
-    /* Якщо у тебе 3 збірки в ряд, на телефоні вони стануть одна під одною */
-    .results-container {
-        display: flex;
+    /* Перетворюємо результат підбору з таблиці в список карток */
+    .result-table thead {
+        display: none; /* Ховаємо заголовки таблиці на мобілках */
+    }
+
+    .result-table, .result-table tbody, .result-table tr, .result-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .result-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #30cfd0;
+        border-radius: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .result-table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border: none !important;
+        font-size: 14px;
+    }
+
+    /* Додаємо підписи до кожного рядка через pseudo-elements */
+    .result-table td::before {
+        content: attr(data-label); /* Бере заголовок з атрибута HTML */
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        text-align: left;
+        font-weight: bold;
+        color: #30cfd0;
+    }
+
+    /* Робимо велику кнопку "Згенерувати" на весь екран */
+    .btn-generate {
+        width: 100%;
+        font-size: 16px;
+        padding: 15px;
+    }
+
+    /* Блок "Разом" робимо більшим і по центру */
+    .total-price {
+        text-align: center;
+        font-size: 24px !important;
+        margin-top: 20px;
+    }
+
+    /* Адаптуємо форму вибору */
+    .input-group {
         flex-direction: column;
     }
 }

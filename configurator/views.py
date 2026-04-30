@@ -7,6 +7,14 @@ def home(request):
     budget_str = ""
     pc_type = "gaming"
 
+    # Дані для випадаючих списків (Конструктора)
+    context_data = {
+        "all_cpus": Cpu.objects.all().order_by('price'),
+        "all_gpus": Gpu.objects.all().order_by('price'),
+        "all_mbs": Motherboard.objects.all().order_by('price'),
+        "all_rams": Ram.objects.all().order_by('price'),
+    }
+
     if request.method == "POST":
         budget_str = request.POST.get("budget", "")
         pc_type = request.POST.get("pc_type", "gaming")
@@ -16,86 +24,59 @@ def home(request):
             if total_budget < 10000:
                 raise ValueError("Мінімальний бюджет для збірки — 10,000 грн.")
 
-            variants = [
-                {"name": "Максимальна потужність", "m": 1.0},
-                {"name": "Бюджетний варіант", "m": 0.8}
-            ]
-
-            for var in variants:
-                current_limit = total_budget * var["m"]
+            # Логіка підбору (Бюджетний та Потужний варіанти)
+            ratios = [1.0] # Можна додати 0.8 для другого варіанту
+            for m in ratios:
+                current_limit = total_budget * m
                 money_left = current_limit
                 explanations = []
 
-                # 1. ПРОЦЕСОР (витрачаємо до 30% залишку)
+                # 1. Процесор (30% бюджету)
                 cpu = Cpu.objects.filter(price__lte=money_left * 0.35).order_by('-price').first()
                 if not cpu: cpu = Cpu.objects.order_by('price').first()
                 money_left -= cpu.price
-                explanations.append(f"🧠 {cpu.name}: Основа збірки.")
+                explanations.append(f"Процесор {cpu.name} обрано як оптимальне серце системи за свою ціну.")
 
-                # 2. МАТЕРИНКА (шукаємо під сокет, витрачаємо до 20% залишку)
+                # 2. Материнка (під сокет)
                 mb = Motherboard.objects.filter(socket=cpu.socket, price__lte=money_left * 0.25).order_by('-price').first()
-                if not mb: # Якщо за таку ціну немає, беремо найдешевшу для цього сокета
-                    mb = Motherboard.objects.filter(socket=cpu.socket).order_by('price').first()
-                
-                mb_name = mb.name if mb else "Не знайдено"
-                mb_price = mb.price if mb else 0
-                money_left -= mb_price
-                explanations.append(f"🔌 {mb_name}: Сумісна материнська плата.")
+                if not mb: mb = Motherboard.objects.filter(socket=cpu.socket).order_by('price').first()
+                money_left -= mb.price
+                explanations.append(f"Материнська плата на сокеті {cpu.socket} забезпечує стабільну роботу та сумісність.")
 
-                # 3. ВІДЕОКАРТА (тільки якщо ігри/стрімінг і залишилося грошей)
+                # 3. Відеокарта (тільки для ігор/стрімінгу)
                 gpu = None
                 if pc_type in ["gaming", "streaming"] and money_left > 3000:
-                    gpu = Gpu.objects.filter(price__lte=money_left * 0.5).order_by('-price').first()
+                    gpu = Gpu.objects.filter(price__lte=money_left * 0.6).order_by('-price').first()
                 
+                gpu_price = 0
                 if gpu:
                     money_left -= gpu.price
-                    gpu_name = gpu.name
                     gpu_price = gpu.price
-                    explanations.append(f"🎮 {gpu_name}: Для графіки.")
+                    explanations.append(f"Відеокарта {gpu.name} дозволить запускати сучасні додатки на високих налаштуваннях.")
                 else:
-                    gpu_name = "Вбудована"
-                    gpu_price = 0
-                    explanations.append("🏢 Використовується вбудоване відео.")
+                    explanations.append("Використовується інтегроване графічне ядро для економії бюджету.")
 
-                # 4. ОЗП, SSD, БЛОК ЖИВЛЕННЯ (беремо найкраще на гроші, що залишилися)
-                ram = Ram.objects.filter(price__lte=money_left * 0.3).order_by('-price').first() or Ram.objects.order_by('price').first()
+                # 4. ОЗП
+                ram = Ram.objects.filter(price__lte=money_left * 0.4).order_by('-price').first() or Ram.objects.order_by('price').first()
                 money_left -= ram.price
 
-                storage = Storage.objects.filter(price__lte=money_left * 0.4).order_by('-price').first() or Storage.objects.order_by('price').first()
+                # 5. Накопичувач
+                storage = Storage.objects.filter(price__lte=money_left * 0.5).order_by('-price').first() or Storage.objects.order_by('price').first()
                 money_left -= storage.price
 
+                # 6. Блок живлення
                 psu = Psu.objects.filter(price__lte=money_left).order_by('-price').first() or Psu.objects.order_by('price').first()
                 
-                # Підсумковий розрахунок (щоб не було 11150 при 10000)
-                final_parts = [cpu, mb, ram, storage, psu]
-                total_p = sum(p.price for p in final_parts if p) + gpu_price
-
-                # ЯКЩО ПЕРЕВИЩИЛИ БЮДЖЕТ — віднімаємо від останніх деталей
-                if total_p > current_limit:
-                    explanations.append("⚠️ Деякі деталі замінено на бюджетні, щоб вкластися в суму.")
+                total_p = cpu.price + mb.price + gpu_price + ram.price + storage.price + psu.price
 
                 results.append({
-                    "variant_name": var["name"],
-                    "cpu": cpu.name if cpu else "Не знайдено",
-                    "cpu_p": cpu.price if cpu else 0,
-                    "gpu": gpu_name,
-                    "gpu_p": gpu_price,
-                    "mb": mb_name,
-                    "mb_p": mb_price,
-                    "ram": ram.name if ram else "Не знайдено",
-                    "ram_p": ram.price if ram else 0,
-                    "storage": storage.name if storage else "Не знайдено",
-                    "storage_p": storage.price if storage else 0,
-                    "psu": psu.name if psu else "Не знайдено",
-                    "psu_p": psu.price if psu else 0,
-                    "total": total_p,
-                    "explanations": explanations
+                    "cpu": cpu, "gpu": gpu, "motherboard": mb, 
+                    "ram": ram, "storage": storage, "psu": psu,
+                    "total": total_p, "explanations": explanations
                 })
 
         except Exception as e:
             error = str(e)
 
-    return render(request, "home.html", {
-        "results": results, "error": error, 
-        "selected_budget": budget_str, "selected_type": pc_type
-    })
+    context_data.update({"results": results, "error": error, "selected_budget": budget_str, "selected_type": pc_type})
+    return render(request, "home.html", context_data)
