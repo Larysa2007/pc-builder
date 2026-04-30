@@ -5,7 +5,6 @@ def home(request):
     results = []
     error = None
     
-    # Завантажуємо всі деталі для випадаючих списків
     context = {
         "all_cpus": Cpu.objects.all().order_by('price'),
         "all_gpus": Gpu.objects.all().order_by('price'),
@@ -21,12 +20,10 @@ def home(request):
             budget = int(budget_val) if budget_val.isdigit() else 0
             pc_type = request.POST.get("pc_type", "gaming")
 
-            # Перевірка на мінімальний бюджет
             if budget < 10000:
-                error = "⚠️ Мінімальний бюджет для збірки — 10,000 грн."
+                error = "⚠️ Мінімальний бюджет для коректного підбору — 10,000 грн."
                 return render(request, "home.html", {**context, "error": error})
 
-            # Дві стратегії: Максимальна та Оптимальна
             strategies = [
                 {"name": "🚀 Максимальна потужність", "factor": 1.0},
                 {"name": "⚖️ Оптимальний баланс", "factor": 0.85}
@@ -34,46 +31,62 @@ def home(request):
 
             for st in strategies:
                 money_left = budget * st["factor"]
-                explanations = [f"Збірка орієнтована на {st['name']}."]
+                explanations = []
 
-                # ФУНКЦІЯ ПІДБОРУ: Пріоритет ручному вибору (тільки для першої збірки)
-                def select_part(model_class, form_name, limit_percent, filter_kwargs={}):
-                    user_id = request.POST.get(form_name)
-                    # Якщо користувач обрав сам і це перша збірка (factor 1.0)
-                    if user_id and st["factor"] == 1.0:
-                        part = model_class.objects.get(id=user_id)
-                        explanations.append(f"✅ Враховано ваш вибір: {part.name}")
-                        return part
-                    # Автопідбір
-                    part = model_class.objects.filter(**filter_kwargs, price__lte=money_left * limit_percent).order_by('-price').first()
-                    if not part: part = model_class.objects.filter(**filter_kwargs).order_by('price').first()
-                    if not part: part = model_class.objects.order_by('price').first()
-                    return part
-
-                # 1. Процесор
-                cpu = select_part(Cpu, "cpu_id", 0.35)
+                # --- 1. ПРОЦЕСОР ---
+                u_cpu = request.POST.get("cpu_id")
+                if u_cpu and st["factor"] == 1.0:
+                    cpu = Cpu.objects.get(id=u_cpu)
+                    explanations.append(f"✅ **Процесор**: Ви обрали <b>{cpu.name}</b>. Це серце вашої системи.")
+                else:
+                    cpu = Cpu.objects.filter(price__lte=money_left * 0.35).order_by('-price').first()
+                    if not cpu: cpu = Cpu.objects.order_by('price').first()
+                    explanations.append(f"🤖 **Процесор**: <b>{cpu.name}</b> — найкращий вибір за потужністю у межах ліміту.")
                 money_left -= cpu.price
 
-                # 2. Материнка (Сумісність по сокету)
-                mb = select_part(Motherboard, "mb_id", 0.2, {"socket": cpu.socket})
+                # --- 2. МАТЕРИНКА ---
+                u_mb = request.POST.get("mb_id")
+                if u_mb and st["factor"] == 1.0:
+                    mb = Motherboard.objects.get(id=u_mb)
+                    explanations.append(f"✅ **Материнка**: Вибрано вашу модель <b>{mb.name}</b>.")
+                else:
+                    mb = Motherboard.objects.filter(socket=cpu.socket, price__lte=money_left * 0.25).order_by('-price').first()
+                    if not mb: mb = Motherboard.objects.filter(socket=cpu.socket).order_by('price').first()
+                    explanations.append(f"🤖 **Материнка**: <b>{mb.name}</b> підібрана автоматично під сокет {cpu.socket}.")
                 money_left -= mb.price
 
-                # 3. Відеокарта (Тільки якщо не офісний ПК)
+                # --- 3. ВІДЕОКАРТА ---
+                u_gpu = request.POST.get("gpu_id")
                 gpu = None
-                user_gpu_id = request.POST.get("gpu_id")
-                if user_gpu_id and st["factor"] == 1.0:
-                    gpu = Gpu.objects.get(id=user_gpu_id)
+                if u_gpu and st["factor"] == 1.0:
+                    gpu = Gpu.objects.get(id=u_gpu)
+                    explanations.append(f"✅ **Відеокарта**: Встановлено обрану вами <b>{gpu.name}</b>.")
                 elif pc_type in ["gaming", "streaming", "video_editing"]:
-                    gpu = Gpu.objects.filter(price__lte=money_left * 0.6).order_by('-price').first()
+                    gpu = Gpu.objects.filter(price__lte=money_left * 0.7).order_by('-price').first()
+                    if gpu:
+                        explanations.append(f"🤖 **Відеокарта**: <b>{gpu.name}</b> обрана для високого FPS.")
+                    else:
+                        explanations.append("ℹ️ **Відеокарта**: Бюджет обмежений, використовуємо графіку процесора.")
                 
                 if gpu: money_left -= gpu.price
 
-                # 4. Решта компонентів
-                ram = select_part(Ram, "ram_id", 0.4)
+                # --- 4. ОЗП ---
+                u_ram = request.POST.get("ram_id")
+                if u_ram and st["factor"] == 1.0:
+                    ram = Ram.objects.get(id=u_ram)
+                    explanations.append(f"✅ **ОЗП**: Ви обрали <b>{ram.name}</b>.")
+                else:
+                    ram = Ram.objects.filter(price__lte=money_left * 0.4).order_by('-price').first()
+                    if not ram: ram = Ram.objects.order_by('price').first()
+                    explanations.append(f"🤖 **ОЗП**: <b>{ram.name}</b> забезпечить стабільну роботу.")
                 money_left -= ram.price
-                storage = select_part(Storage, "storage_id", 0.5)
+
+                # --- 5. ДИСК ТА БЖ ---
+                storage = Storage.objects.filter(price__lte=money_left * 0.5).order_by('-price').first() or Storage.objects.first()
                 money_left -= storage.price
-                psu = select_part(Psu, "psu_id", 1.0)
+                psu = Psu.objects.filter(price__lte=money_left).order_by('-price').first() or Psu.objects.first()
+                
+                explanations.append(f"🤖 **Блок живлення**: <b>{psu.name}</b> підібраний з урахуванням споживання деталей.")
 
                 total_sum = cpu.price + mb.price + (gpu.price if gpu else 0) + ram.price + storage.price + psu.price
                 
@@ -86,7 +99,7 @@ def home(request):
                 })
 
         except Exception as e:
-            error = f"Сталася помилка: {e}"
+            error = f"Сталася помилка при розрахунку: {e}"
 
     context.update({"results": results, "error": error})
     return render(request, "home.html", context)
