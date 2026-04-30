@@ -4,7 +4,10 @@ from .models import Cpu, Gpu, Ram, Storage, Psu, Motherboard
 def home(request):
     results = []
     error = None
-    
+    budget_str = ""  # Додано: ініціалізація змінної, щоб уникнути помилки UnboundLocalError
+    pc_type = "gaming" # Початкове значення за замовчуванням
+    manual_ids = {}
+
     # Попереднє завантаження всіх списків для конструктора
     context = {
         "all_cpus": Cpu.objects.all().order_by('name'),
@@ -14,7 +17,7 @@ def home(request):
     }
 
     if request.method == "POST":
-        budget_str = request.POST.get("budget")
+        budget_str = request.POST.get("budget", "")
         pc_type = request.POST.get("pc_type", "gaming")
         
         # Отримуємо ID деталей, які користувач обрав вручну
@@ -26,7 +29,7 @@ def home(request):
         }
 
         try:
-            budget = int(budget_str) if budget_str else 0
+            budget = int(budget_str) if budget_str and budget_str.isdigit() else 0
             
             # Коефіцієнти розподілу бюджету та мітки для пояснень
             ratios = {
@@ -40,7 +43,7 @@ def home(request):
             # --- ПІДБІР КОМПОНЕНТІВ ---
 
             # 1. ПРОЦЕСОР
-            if manual_ids['cpu']:
+            if manual_ids.get('cpu'):
                 cpu = Cpu.objects.get(id=manual_ids['cpu'])
                 explanations.append(f"✅ Процесор {cpu.name} обрано вами вручну.")
             else:
@@ -49,8 +52,8 @@ def home(request):
 
             if not cpu: raise ValueError("Бюджет занадто малий для підбору процесора.")
 
-            # 2. МАТЕРИНСЬКА ПЛАТА (Перевірка сокета)
-            if manual_ids['mb']:
+            # 2. МАТЕРИНСЬКА ПЛАТА
+            if manual_ids.get('mb'):
                 motherboard = Motherboard.objects.get(id=manual_ids['mb'])
                 if motherboard.socket != cpu.socket:
                     error = f"❌ Помилка сумісності: Материнка ({motherboard.socket}) не підходить до CPU ({cpu.socket})!"
@@ -59,10 +62,11 @@ def home(request):
                 motherboard = Motherboard.objects.filter(socket=cpu.socket, price__lte=budget * ratio['mb']).order_by('-price').first()
                 if not motherboard:
                     motherboard = Motherboard.objects.filter(socket=cpu.socket).order_by('price').first()
-                explanations.append(f"⚙️ Плата {motherboard.name} автоматично перевірена на сумісність із сокетом {cpu.socket}.")
+                if motherboard:
+                    explanations.append(f"⚙️ Плата {motherboard.name} автоматично перевірена на сумісність із сокетом {cpu.socket}.")
 
             # 3. ВІДЕОКАРТА
-            if manual_ids['gpu']:
+            if manual_ids.get('gpu'):
                 gpu = Gpu.objects.get(id=manual_ids['gpu'])
                 explanations.append(f"✅ Відеокарту {gpu.name} обрано вами.")
             else:
@@ -71,14 +75,14 @@ def home(request):
                 else: explanations.append("⚠️ Використовується вбудоване графічне ядро для економії коштів.")
 
             # 4. ОПЕРАТИВНА ПАМ'ЯТЬ
-            if manual_ids['ram']:
+            if manual_ids.get('ram'):
                 ram = Ram.objects.get(id=manual_ids['ram'])
                 explanations.append(f"✅ ОЗП {ram.name} обрано вами.")
             else:
                 ram = Ram.objects.filter(price__lte=budget * ratio['ram']).order_by('-price').first()
                 if ram: explanations.append(f"⚡ Пам'ять {ram.name} обрана для стабільної роботи додатків.")
 
-            # 5. НАКОПИЧУВАЧ ТА БЛОК ЖИВЛЕННЯ (Автоматично)
+            # 5. НАКОПИЧУВАЧ ТА БЛОК ЖИВЛЕННЯ
             storage = Storage.objects.filter(price__lte=budget * ratio['ssd']).order_by('-price').first()
             psu = Psu.objects.filter(price__lte=budget * ratio['psu']).order_by('-price').first()
             if storage: explanations.append(f"💾 Накопичувач {storage.name} забезпечить швидкість роботи ОС.")
@@ -100,6 +104,7 @@ def home(request):
         except Exception as e:
             error = str(e)
 
+    # Оновлюємо контекст для відображення результатів
     context.update({
         "results": results, 
         "error": error, 
@@ -107,4 +112,5 @@ def home(request):
         "selected_type": pc_type,
         "manual": manual_ids
     })
+    
     return render(request, "home.html", context)
