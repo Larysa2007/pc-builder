@@ -103,3 +103,22 @@ button:hover {
         padding: 10px;
     }
 }
+/* Налаштування для мобільних телефонів */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    /* Щоб випадаючі списки були на всю ширину */
+    select, input {
+        width: 100% !important;
+        margin-bottom: 15px;
+    }
+
+    /* Якщо у тебе 3 збірки в ряд, на телефоні вони стануть одна під одною */
+    .results-container {
+        display: flex;
+        flex-direction: column;
+    }
+}
