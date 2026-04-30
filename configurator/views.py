@@ -1,105 +1,110 @@
-from django.shortcuts import render, redirect
-from .models import Cpu, Gpu, Ram, Storage, Psu, Motherboard, Build
+from django.shortcuts import render
+from .models import Cpu, Gpu, Ram, Storage, Psu, Motherboard
 
 def home(request):
     results = []
     error = None
-    pc_type = request.POST.get("pc_type")
-    budget_str = request.POST.get("budget")
-    selected_gpu_id = request.POST.get("gpu_id")
+    
+    # Попереднє завантаження всіх списків для конструктора
+    context = {
+        "all_cpus": Cpu.objects.all().order_by('name'),
+        "all_gpus": Gpu.objects.all().order_by('name'),
+        "all_mbs": Motherboard.objects.all().order_by('name'),
+        "all_rams": Ram.objects.all().order_by('name'),
+    }
 
-    gpus = Gpu.objects.all()
-
-    if request.method == "POST" and budget_str:
-        try:
-            budget = int(budget_str)
-
-            ratios = {
-                "gaming": {'cpu': 0.25, 'gpu': 0.40, 'ram': 0.12, 'ssd': 0.08, 'psu': 0.07, 'mb': 0.08, 'score': 95, 'name': "Ігровий ПК"},
-                "office": {'cpu': 0.40, 'gpu': 0.05, 'ram': 0.15, 'ssd': 0.15, 'psu': 0.10, 'mb': 0.15, 'score': 50, 'name': "Офісний ПК"},
-                "work":   {'cpu': 0.35, 'gpu': 0.20, 'ram': 0.20, 'ssd': 0.10, 'psu': 0.05, 'mb': 0.10, 'score': 85, 'name': "Робоча станція"},
-                "stream": {'cpu': 0.30, 'gpu': 0.30, 'ram': 0.15, 'ssd': 0.10, 'psu': 0.07, 'mb': 0.08, 'score': 90, 'name': "ПК для стрімінгу"}
-            }
-
-            ratio = ratios.get(pc_type, ratios["gaming"])
-
-            def pick_build(multiplier):
-                cpu = Cpu.objects.filter(price__lte=budget * (ratio['cpu'] * multiplier)).order_by('-price').first()
-                if not cpu:
-                    return None
-
-                motherboard = Motherboard.objects.filter(socket=cpu.socket).order_by('-price').first()
-                ram = Ram.objects.filter(price__lte=budget * (ratio['ram'] * multiplier)).order_by('-price').first()
-
-                if selected_gpu_id:
-                    gpu = Gpu.objects.get(id=selected_gpu_id)
-                else:
-                    gpu = Gpu.objects.filter(price__lte=budget * (ratio['gpu'] * multiplier)).order_by('-price').first()
-
-                storage = Storage.objects.filter(price__lte=budget * (ratio['ssd'] * multiplier)).order_by('-price').first()
-                psu = Psu.objects.filter(price__lte=budget * (ratio['psu'] * multiplier)).order_by('-price').first()
-
-                items = [cpu, gpu, ram, storage, psu, motherboard]
-                total = sum(item.price for item in items if item)
-
-                if total > budget:
-                    return None
-
-                explanation = [
-                    f"Процесор {cpu.name} обрано через оптимальне співвідношення ціни та продуктивності.",
-                    f"Відеокарта {gpu.name if gpu else 'вбудована'} відповідає типу ПК ({ratio['name']}).",
-                    f"Материнська плата сумісна із сокетом {cpu.socket}.",
-                    f"Оперативна пам’ять забезпечує стабільну роботу системи.",
-                    f"Загальна вартість {total} грн не перевищує бюджет {budget} грн."
-                ]
-
-                return {
-                    "cpu": cpu,
-                    "gpu": gpu,
-                    "ram": ram,
-                    "storage": storage,
-                    "psu": psu,
-                    "motherboard": motherboard,
-                    "total": total,
-                    "explanation": explanation
-                }
-
-            # 3 варіанти
-            for m in [1.0, 0.85, 0.7]:
-                build = pick_build(m)
-                if build:
-                    results.append(build)
-
-            if not results:
-                error = f"На жаль, у базі немає деталей для бюджету {budget} грн."
-
-        except ValueError:
-            error = "Введіть числове значення бюджету."
-
-    return render(request, "home.html", {
-        "results": results,
-        "error": error,
-        "selected_type": pc_type,
-        "selected_budget": budget_str,
-        "gpus": gpus
-    })
-
-
-def save_build(request):
     if request.method == "POST":
-        Build.objects.create(
-            cpu=request.POST.get("cpu_name"),
-            gpu=request.POST.get("gpu_name"),
-            motherboard=request.POST.get("mb_name"),
-            ram=request.POST.get("ram_name"),
-            storage=request.POST.get("storage_name"),
-            psu=request.POST.get("psu_name"),
-            total_price=request.POST.get("total_price")
-        )
-        return redirect('view_builds')
-    return redirect('home')
+        budget_str = request.POST.get("budget")
+        pc_type = request.POST.get("pc_type", "gaming")
+        
+        # Отримуємо ID деталей, які користувач обрав вручну
+        manual_ids = {
+            'cpu': request.POST.get("cpu_id"),
+            'gpu': request.POST.get("gpu_id"),
+            'mb': request.POST.get("mb_id"),
+            'ram': request.POST.get("ram_id"),
+        }
 
+        try:
+            budget = int(budget_str) if budget_str else 0
+            
+            # Коефіцієнти розподілу бюджету та мітки для пояснень
+            ratios = {
+                "gaming": {'cpu': 0.25, 'gpu': 0.40, 'ram': 0.12, 'ssd': 0.08, 'psu': 0.07, 'mb': 0.08, 'label': 'ігрових задач'},
+                "office": {'cpu': 0.40, 'gpu': 0.05, 'ram': 0.15, 'ssd': 0.15, 'psu': 0.10, 'mb': 0.15, 'label': 'офісної роботи'},
+                "work":   {'cpu': 0.35, 'gpu': 0.20, 'ram': 0.20, 'ssd': 0.10, 'psu': 0.05, 'mb': 0.10, 'label': 'професійної роботи'},
+            }
+            ratio = ratios.get(pc_type, ratios["gaming"])
+            explanations = []
 
-def view_builds(request):
-    builds = Build.objects.all().order_by('-id')
-    return render(request, 'builds.html', {'builds': builds})
+            # --- ПІДБІР КОМПОНЕНТІВ ---
+
+            # 1. ПРОЦЕСОР
+            if manual_ids['cpu']:
+                cpu = Cpu.objects.get(id=manual_ids['cpu'])
+                explanations.append(f"✅ Процесор {cpu.name} обрано вами вручну.")
+            else:
+                cpu = Cpu.objects.filter(price__lte=budget * ratio['cpu']).order_by('-price').first()
+                if cpu: explanations.append(f"🤖 Процесор {cpu.name} підібрано як оптимальний за ціною для {ratio['label']}.")
+
+            if not cpu: raise ValueError("Бюджет занадто малий для підбору процесора.")
+
+            # 2. МАТЕРИНСЬКА ПЛАТА (Перевірка сокета)
+            if manual_ids['mb']:
+                motherboard = Motherboard.objects.get(id=manual_ids['mb'])
+                if motherboard.socket != cpu.socket:
+                    error = f"❌ Помилка сумісності: Материнка ({motherboard.socket}) не підходить до CPU ({cpu.socket})!"
+                explanations.append(f"✅ Материнську плату {motherboard.name} обрано вами.")
+            else:
+                motherboard = Motherboard.objects.filter(socket=cpu.socket, price__lte=budget * ratio['mb']).order_by('-price').first()
+                if not motherboard:
+                    motherboard = Motherboard.objects.filter(socket=cpu.socket).order_by('price').first()
+                explanations.append(f"⚙️ Плата {motherboard.name} автоматично перевірена на сумісність із сокетом {cpu.socket}.")
+
+            # 3. ВІДЕОКАРТА
+            if manual_ids['gpu']:
+                gpu = Gpu.objects.get(id=manual_ids['gpu'])
+                explanations.append(f"✅ Відеокарту {gpu.name} обрано вами.")
+            else:
+                gpu = Gpu.objects.filter(price__lte=budget * ratio['gpu']).order_by('-price').first()
+                if gpu: explanations.append(f"🎮 Відеокарта {gpu.name} забезпечує найкращу графіку для даного бюджету.")
+                else: explanations.append("⚠️ Використовується вбудоване графічне ядро для економії коштів.")
+
+            # 4. ОПЕРАТИВНА ПАМ'ЯТЬ
+            if manual_ids['ram']:
+                ram = Ram.objects.get(id=manual_ids['ram'])
+                explanations.append(f"✅ ОЗП {ram.name} обрано вами.")
+            else:
+                ram = Ram.objects.filter(price__lte=budget * ratio['ram']).order_by('-price').first()
+                if ram: explanations.append(f"⚡ Пам'ять {ram.name} обрана для стабільної роботи додатків.")
+
+            # 5. НАКОПИЧУВАЧ ТА БЛОК ЖИВЛЕННЯ (Автоматично)
+            storage = Storage.objects.filter(price__lte=budget * ratio['ssd']).order_by('-price').first()
+            psu = Psu.objects.filter(price__lte=budget * ratio['psu']).order_by('-price').first()
+            if storage: explanations.append(f"💾 Накопичувач {storage.name} забезпечить швидкість роботи ОС.")
+            if psu: explanations.append(f"🔌 Блок живлення {psu.name} підібрано під потужність системи.")
+
+            # Розрахунок загальної вартості
+            items = [cpu, gpu, ram, storage, psu, motherboard]
+            total_price = sum(item.price for item in items if item)
+
+            if total_price > budget and budget > 0:
+                error = f"Увага: Загальна вартість ({total_price} грн) перевищила вказаний бюджет!"
+
+            results.append({
+                "cpu": cpu, "gpu": gpu, "ram": ram, "storage": storage,
+                "psu": psu, "motherboard": motherboard, "total": total_price,
+                "explanations": explanations
+            })
+
+        except Exception as e:
+            error = str(e)
+
+    context.update({
+        "results": results, 
+        "error": error, 
+        "selected_budget": budget_str,
+        "selected_type": pc_type,
+        "manual": manual_ids
+    })
+    return render(request, "home.html", context)
