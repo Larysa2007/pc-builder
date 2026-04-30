@@ -4,31 +4,149 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
     <title>PC Configurator Pro</title>
+
     <style>
-        :root { --neon-blue: #00d2ff; --neon-green: #00ff88; --dark-bg: #0b0e14; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: white; display: flex; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
-        .container { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 900px; text-align: center; }
-        h1 { background: linear-gradient(to right, var(--neon-blue), var(--neon-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.2rem; text-transform: uppercase; margin-bottom: 30px; }
-        .input-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        .group { text-align: left; }
-        label { display: block; margin-bottom: 8px; color: #94a3b8; font-size: 0.9rem; }
-        select, input { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #334155; background: #0f172a; color: white; font-size: 1rem; box-sizing: border-box; }
-        .main-btn { grid-column: span 2; padding: 15px; background: linear-gradient(45deg, var(--neon-blue), var(--neon-green)); color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: 800; text-transform: uppercase; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; margin-top: 20px; }
-        .part-card { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: left; }
-        .part-card b { color: var(--neon-blue); font-size: 0.8rem; display: block; margin-bottom: 5px; }
-        .total-price { margin: 25px 0; font-size: 1.6rem; color: #fbbf24; font-weight: bold; border: 1px solid #fbbf24; padding: 15px; border-radius: 12px; display: inline-block; }
-        .error-box { background: rgba(220, 38, 38, 0.1); border: 1px solid #dc2626; padding: 20px; border-radius: 15px; color: #fca5a5; margin-top: 20px; text-align: left; }
-        .explanation-box { margin-top: 25px; background: rgba(0, 210, 255, 0.05); border: 1px dashed var(--neon-blue); border-radius: 12px; padding: 20px; text-align: left; }
-        .explanation-box h4 { color: var(--neon-blue); margin-top: 0; }
-        .explanation-box ul { padding-left: 20px; color: #cbd5e1; }
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-green: #00ff88;
+            --dark-bg: #0b0e14;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h1 {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .input-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .group {
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .main-btn {
+            grid-column: span 2;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .part-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: left;
+        }
+
+        .part-card b {
+            color: var(--neon-blue);
+            font-size: 0.8rem;
+            display: block;
+        }
+
+        .total-price {
+            margin: 20px 0;
+            font-size: 1.5rem;
+            color: #fbbf24;
+            font-weight: bold;
+            border: 1px solid #fbbf24;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .error-box {
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid #dc2626;
+            padding: 20px;
+            border-radius: 15px;
+            color: #fca5a5;
+            margin-top: 20px;
+        }
+
+        .explanation-box {
+            margin-top: 15px;
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px dashed var(--neon-blue);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: left;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: 1px solid #334155;
+        }
     </style>
 </head>
+
 <body>
 <div class="container">
+
     <h1>🚀 PC Configurator Pro</h1>
+
     <form method="POST" class="input-form">
         {% csrf_token %}
+
         <div class="group">
             <label>Тип комп'ютера:</label>
             <select name="pc_type">
@@ -38,44 +156,61 @@
                 <option value="stream" {% if selected_type == 'stream' %}selected{% endif %}>🎥 Стрімінг</option>
             </select>
         </div>
+
         <div class="group">
             <label>Бюджет (грн):</label>
             <input type="number" name="budget" value="{{ selected_budget|default:15000 }}" required>
         </div>
+
         <button type="submit" class="main-btn">СФОРМУВАТИ КОНФІГУРАЦІЮ</button>
     </form>
 
     {% if error %}
         <div class="error-box">
-            <h3>⚠️ Увага</h3>
+            <h3>⚠️ Помилка</h3>
             <p>{{ error }}</p>
-            <p>Спробуйте збільшити бюджет.</p>
         </div>
     {% endif %}
 
+    <!-- 🔽 РУЧНА ЗМІНА GPU -->
+    <form method="POST">
+        {% csrf_token %}
+        <label>🔄 Змінити відеокарту:</label>
+        <select name="gpu_id">
+            {% for g in gpus %}
+            <option value="{{ g.id }}">{{ g.name }} ({{ g.price }} грн)</option>
+            {% endfor %}
+        </select>
+        <button class="main-btn" type="submit">Застосувати</button>
+    </form>
 
-    {% if results %}
-    {% for result in results %}
-        <div class="card-grid">
-            <div class="part-card"><b>Процесор</b> {{ result.cpu.name }} ({{ result.cpu.price }} грн)</div>
-            <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:"Вбудована" }} ({{ result.gpu.price|default:0 }} грн)</div>
-            <div class="part-card"><b>Материнська плата</b> {{ result.motherboard.name }}</div>
-            <div class="part-card"><b>ОЗП</b> {{ result.ram.name }}</div>
-            <div class="part-card"><b>Накопичувач</b> {{ result.storage.name }}</div>
-            <div class="part-card"><b>БЖ</b> {{ result.psu.name }}</div>
-        </div>
+    <!-- 🔽 3 ВАРІАНТИ -->
+    {% for build in results %}
+    <div class="card-grid">
 
-        <div class="total-price">💰 {{ result.total }} грн</div>
+        <div class="part-card"><b>Процесор</b> {{ build.cpu.name }}</div>
+        <div class="part-card"><b>Відеокарта</b> {{ build.gpu.name }}</div>
+        <div class="part-card"><b>ОЗП</b> {{ build.ram.name }}</div>
+        <div class="part-card"><b>Накопичувач</b> {{ build.storage.name }}</div>
+        <div class="part-card"><b>БЖ</b> {{ build.psu.name }}</div>
+        <div class="part-card"><b>Плата</b> {{ build.motherboard.name }}</div>
 
-        <div class="explanation-box">
-            <h4>🤖 Детальний аналіз:</h4>
-            <ul>
-                {% for text in result.explanation %}
-                <li>{{ text }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+    </div>
 
-        <hr style="margin:40px 0;">
+    <div class="total-price">💰 {{ build.total }} грн</div>
+
+    <div class="explanation-box">
+        <h4>🤖 Детальне пояснення:</h4>
+        <ul>
+            {% for text in build.explanation %}
+            <li>{{ text }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <hr>
     {% endfor %}
-{% endif %}
+
+</div>
+</body>
+</html>
