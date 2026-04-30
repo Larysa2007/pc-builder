@@ -127,10 +127,10 @@
     </style>
 </head>
 
+<!-- ... (твій існуючий <style> залишається без змін) ... -->
+
 <body>
-
 <div class="container">
-
     <h1>🚀 PC Configurator Pro</h1>
 
     <form method="POST" class="input-form">
@@ -139,21 +139,35 @@
         <div class="group">
             <label>Тип комп'ютера:</label>
             <select name="pc_type">
-                <option value="gaming">🎮 Ігровий</option>
-                <option value="office">💼 Офісний</option>
-                <option value="work">🖥️ Робоча станція</option>
-                <option value="stream">🎥 Стрімінг</option>
+                <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий</option>
+                <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісний</option>
+                <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Робоча станція</option>
+                <option value="stream" {% if selected_type == 'stream' %}selected{% endif %}>🎥 Стрімінг</option>
             </select>
         </div>
 
         <div class="group">
             <label>Бюджет (грн):</label>
-            <input type="number" name="budget" required>
+            <input type="number" name="budget" value="{{ selected_budget }}" required>
         </div>
 
         <button type="submit" class="main-btn">
             СФОРМУВАТИ КОНФІГУРАЦІЮ
         </button>
+
+        <!-- Блок "Змінити відеокарту", як на скріншоті -->
+        <div style="grid-column: span 2; margin-top: 20px;">
+            <label>🔄 Змінити відеокарту:</label>
+            <select name="gpu_id">
+                <option value="">-- Автоматичний підбір --</option>
+                {% for gpu in gpus %}
+                    <option value="{{ gpu.id }}">{{ gpu.name }} ({{ gpu.price }} грн)</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="main-btn" style="margin-top: 10px; padding: 10px; width: auto; background: var(--neon-green);">
+                ЗАСТОСУВАТИ
+            </button>
+        </div>
     </form>
 
     {% if error %}
@@ -163,39 +177,13 @@
     {% endif %}
 
     {% for build in results %}
-
         <div class="card-grid">
-
-            <div class="part-card">
-                <b>Процесор</b>
-                {% if build.cpu %}{{ build.cpu.name }}{% else %}❌ Не знайдено{% endif %}
-            </div>
-
-            <div class="part-card">
-                <b>Відеокарта</b>
-                {% if build.gpu %}{{ build.gpu.name }}{% else %}⚠️ Вбудована{% endif %}
-            </div>
-
-            <div class="part-card">
-                <b>Материнська плата</b>
-                {% if build.motherboard %}{{ build.motherboard.name }}{% else %}❌ Не знайдено{% endif %}
-            </div>
-
-            <div class="part-card">
-                <b>ОЗП</b>
-                {% if build.ram %}{{ build.ram.name }}{% else %}❌ Не знайдено{% endif %}
-            </div>
-
-            <div class="part-card">
-                <b>Накопичувач</b>
-                {% if build.storage %}{{ build.storage.name }}{% else %}❌ Не знайдено{% endif %}
-            </div>
-
-            <div class="part-card">
-                <b>Блок живлення</b>
-                {% if build.psu %}{{ build.psu.name }}{% else %}❌ Не знайдено{% endif %}
-            </div>
-
+            <div class="part-card"><b>Процесор</b> {{ build.cpu.name|default:"❌ Не знайдено" }}</div>
+            <div class="part-card"><b>Відеокарта</b> {{ build.gpu.name|default:"⚠️ Вбудована" }}</div>
+            <div class="part-card"><b>Материнська плата</b> {{ build.motherboard.name|default:"❌ Не знайдено" }}</div>
+            <div class="part-card"><b>ОЗП</b> {{ build.ram.name|default:"❌ Не знайдено" }}</div>
+            <div class="part-card"><b>Накопичувач</b> {{ build.storage.name|default:"❌ Не знайдено" }}</div>
+            <div class="part-card"><b>Блок живлення</b> {{ build.psu.name|default:"❌ Не знайдено" }}</div>
         </div>
 
         <div class="total-price">
@@ -206,16 +194,11 @@
             <b>🤖 Детальне пояснення:</b>
             <ul>
                 {% for text in build.explanation %}
-                <li>{{ text }}</li>
+                    <li>{{ text }}</li>
                 {% endfor %}
             </ul>
         </div>
-
         <hr>
-
     {% endfor %}
-
 </div>
-
 </body>
-</html>
