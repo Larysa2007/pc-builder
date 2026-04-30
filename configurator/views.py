@@ -11,7 +11,7 @@ def home(request):
         "all_gpus": Gpu.objects.all().order_by('name'),
         "all_mbs": Motherboard.objects.all().order_by('name'),
         "all_rams": Ram.objects.all().order_by('name'),
-    }  
+    }
 
     if request.method == "POST":
         budget_str = request.POST.get("budget")
