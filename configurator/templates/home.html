@@ -53,17 +53,19 @@
         </div>
     {% endif %}
 
-    {% if result %}
+
+    {% if results %}
+    {% for result in results %}
         <div class="card-grid">
-            <div class="part-card"><b>Процесор</b> {{ result.cpu.name|default:result.cpu }} ({{ result.cpu.price }} грн)</div>
-            <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:result.gpu|default:"Вбудована" }} ({{ result.gpu.price|default:0 }} грн)</div>
-            <div class="part-card"><b>Материнська плата</b> {{ result.motherboard.name|default:result.motherboard|default:"Не знайдено" }}</div>
-            <div class="part-card"><b>Оперативна пам'ять</b> {{ result.ram.name|default:result.ram|default:"8GB DDR4" }}</div>
-            <div class="part-card"><b>Накопичувач</b> {{ result.storage.name|default:result.storage|default:"SSD 480GB" }}</div>
-            <div class="part-card"><b>Блок живлення</b> {{ result.psu.name|default:result.psu|default:"500W Bronze" }}</div>
+            <div class="part-card"><b>Процесор</b> {{ result.cpu.name }} ({{ result.cpu.price }} грн)</div>
+            <div class="part-card"><b>Відеокарта</b> {{ result.gpu.name|default:"Вбудована" }} ({{ result.gpu.price|default:0 }} грн)</div>
+            <div class="part-card"><b>Материнська плата</b> {{ result.motherboard.name }}</div>
+            <div class="part-card"><b>ОЗП</b> {{ result.ram.name }}</div>
+            <div class="part-card"><b>Накопичувач</b> {{ result.storage.name }}</div>
+            <div class="part-card"><b>БЖ</b> {{ result.psu.name }}</div>
         </div>
 
-        <div class="total-price">💰 ПІДСУМОК: {{ result.total }} грн</div>
+        <div class="total-price">💰 {{ result.total }} грн</div>
 
         <div class="explanation-box">
             <h4>🤖 Аналіз експертної системи:</h4>
