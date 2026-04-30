@@ -152,11 +152,12 @@
         <div class="config-grid">
             <div>
                 <label>Призначення ПК:</label>
-                <select name="pc_type">
-                    <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий комп'ютер</option>
-                    <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісна станція</option>
-                    <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Робоча станція</option>
-                </select>
+            <select name="pc_type" class="form-select">
+                <option value="gaming" {% if selected_type == 'gaming' %}selected{% endif %}>🎮 Ігровий комп'ютер</option>
+                <option value="streaming" {% if selected_type == 'streaming' %}selected{% endif %}>🎥 Стрімінг та контент</option>
+                <option value="office" {% if selected_type == 'office' %}selected{% endif %}>💼 Офісна станція</option>
+                <option value="work" {% if selected_type == 'work' %}selected{% endif %}>🖥️ Робоча станція</option>
+            </select>
             </div>
             <div>
                 <label>Граничний бюджет (грн):</label>
